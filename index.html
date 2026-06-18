@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jacob Corp. | Advanced Markdown Studio</title>
+    <title>Jacob Corp. | Ultimate Markdown Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         :root {
             --bg-dark: #0d1117;
@@ -27,7 +29,7 @@
             overflow: hidden;
         }
 
-        /* Top Navbar */
+        /* Top Executive Navbar */
         header {
             background-color: #1f242c;
             border-bottom: 1px solid var(--border-color);
@@ -35,6 +37,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
 
         .brand {
@@ -47,17 +50,48 @@
             color: var(--accent-blue);
         }
 
-        .status-badge {
-            background-color: #21262d;
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
-            padding: 0.4rem 0.8rem;
+            color: #fff;
+            padding: 0.5rem 1rem;
             border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #21262d;
+            border-color: #8b949e;
+        }
+
+        .status-badge {
             font-size: 0.85rem;
             font-family: monospace;
             color: #8b949e;
         }
 
-        /* Studio Split Screen Workspace */
+        /* Analytics Status Bar Footer */
+        footer {
+            background-color: #0f141c;
+            border-top: 1px solid var(--border-color);
+            padding: 0.4rem 1.5rem;
+            display: flex;
+            gap: 20px;
+            font-size: 0.8rem;
+            color: #8b949e;
+            font-family: monospace;
+        }
+
+        /* Studio Workspace split layout */
         .workspace {
             display: flex;
             flex: 1;
@@ -69,6 +103,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .editor-pane {
@@ -77,18 +112,15 @@
 
         .pane-title {
             background-color: #0f141c;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
             font-size: 0.8rem;
             text-transform: uppercase;
             font-weight: 600;
             color: #8b949e;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        /* Code Editor Input Textarea */
+        /* Scrollable Work zones */
         textarea {
             flex: 1;
             background-color: #090d13;
@@ -100,9 +132,9 @@
             font-size: 1rem;
             line-height: 1.6;
             outline: none;
+            overflow-y: auto;
         }
 
-        /* Render Preview Container */
         .preview-body {
             flex: 1;
             padding: 1.5rem;
@@ -111,26 +143,21 @@
             line-height: 1.6;
         }
 
-        /* Markdown Elements Custom Styling inside Preview */
-        .preview-body h1, .preview-body h2, .preview-body h3 { color: #ffffff; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; }
-        .preview-body a { color: var(--accent-blue); }
-        .preview-body code { background-color: rgba(110,118,129,0.4); padding: 0.2rem 0.4rem; border-radius: 6px; font-family: monospace; font-size: 85%; }
+        /* Advanced Element Formatting Matrix */
+        .preview-body h1, .preview-body h2, .preview-body h3 { color: #ffffff; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-top: 1.5rem; }
+        .preview-body a { color: var(--accent-blue); text-decoration: none; }
+        .preview-body a:hover { text-decoration: underline; }
+        .preview-body code { background-color: rgba(110,118,129,0.3); padding: 0.2rem 0.4rem; border-radius: 6px; font-family: monospace; font-size: 85%; color: #ff7b72; }
         
-        /* Copy and Paste code blocks styling */
-        .preview-body pre { background-color: var(--panel-bg); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; overflow-x: auto; position: relative; }
-        .preview-body pre code { background-color: transparent; padding: 0; font-size: 0.95rem; }
+        /* Preformatted blocks containing highlight tokens */
+        .preview-body pre { background-color: var(--panel-bg); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; overflow-x: auto; }
+        .preview-body pre code { background-color: transparent; padding: 0; font-size: 0.95rem; color: inherit; }
 
-        .preview-body blockquote { margin: 1rem 0; padding: 0 1rem; color: #8b949e; border-left: 0.25rem solid #30363d; }
+        .preview-body blockquote { margin: 1rem 0; padding: 0 1rem; color: #8b949e; border-left: 0.25rem solid #30363d; background-color: rgba(110,118,129,0.05); }
 
-        /* Custom GitHub Alert Callout Blocks */
-        .alert-block {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-left: 4px solid;
-            border-radius: 6px;
-            background-color: rgba(110, 118, 129, 0.05);
-        }
-        .alert-title { font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 6px; }
+        /* Premium Alert Callout Frameworks */
+        .alert-block { padding: 1rem; margin: 1rem 0; border-left: 4px solid; border-radius: 6px; background-color: rgba(110, 118, 129, 0.03); }
+        .alert-title { font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 6px; font-size: 0.95rem; }
         
         .alert-note { border-left-color: #1f6feb; color: #58a6ff; }
         .alert-tip { border-left-color: #238636; color: #56d364; }
@@ -142,96 +169,130 @@
 <body>
 
     <header>
-        <div class="brand">JACOB<span>CORP</span> // Markdown Studio</div>
-        <div class="status-badge" id="save-status">💾 System Synced</div>
+        <div class="brand">JACOB<span>CORP</span> // Meta Markdown Engine</div>
+        <div class="controls">
+            <span class="status-badge" id="save-status">💾 Workspace Clean</span>
+            <button class="btn" onclick="exportMarkdownFile()">📥 Export Document</button>
+        </div>
     </header>
 
     <div class="workspace">
         <div class="pane editor-pane">
-            <div class="pane-title">Raw Markdown / HTML Input</div>
-            <textarea id="markdown-input" placeholder="Type # Markdown, raw HTML tags, or > [!WARNING] alerts here..."></textarea>
+            <div class="pane-title">Raw Scripting Canvas</div>
+            <textarea id="markdown-input" placeholder="Type data arrays here..."></textarea>
         </div>
 
         <div class="pane">
-            <div class="pane-title">Live Production Render Preview</div>
+            <div class="pane-title">Real-time Compiler Output Preview</div>
             <div class="preview-body" id="preview-output"></div>
         </div>
     </div>
+
+    <footer>
+        <span id="stat-words">Words: 0</span>
+        <span id="stat-chars">Characters: 0</span>
+        <span id="stat-time">Est. Reading Time: 0m</span>
+    </footer>
 
     <script>
         const inputArea = document.getElementById('markdown-input');
         const outputDiv = document.getElementById('preview-output');
         const saveStatus = document.getElementById('save-status');
 
-        // Configure Marked library to allow raw HTML header rendering tags natively
+        // Setup Markdown parsing flags along with real-time code parsing overrides
         marked.setOptions({
             allowRawHtml: true,
             breaks: true,
-            gfm: true
+            gfm: true,
+            highlight: function(code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            }
         });
 
-        // Regex matrix rule processor to transform GitHub style tags > [!WARNING] into actual components
-        function parseCustomGitHubAlerts(htmlContent) {
-            const alerts = [
-                { type: 'note', keyword: 'NOTE', icon: 'ℹ️' },
-                { type: 'tip', keyword: 'TIP', icon: '💡' },
-                { type: 'important', keyword: 'IMPORTANT', icon: '📢' },
-                { type: 'warning', keyword: 'WARNING', icon: '⚠️' },
-                { type: 'caution', keyword: 'CAUTION', icon: '🛑' }
+        // Advanced regex rule parser engine matching every standard alert tag token
+        function parseAllAlertBlocks(htmlContent) {
+            const structures = [
+                { keyword: 'NOTE', icon: 'ℹ️', cls: 'note' },
+                { keyword: 'TIP', icon: '💡', cls: 'tip' },
+                { keyword: 'IMPORTANT', icon: '📢', cls: 'important' },
+                { keyword: 'WARNING', icon: '⚠️', cls: 'warning' },
+                { keyword: 'CAUTION', icon: '🛑', cls: 'caution' }
             ];
 
-            let modifiedHtml = htmlContent;
-            alerts.forEach(alert => {
-                // Matches markdown blockquotes containing the banner configuration token
-                const alertRegex = new RegExp(`<blockquote>\\s*<p>\\s*\\[!${alert.keyword}\\]([\\s\\S]*?)</p>\\s*<\/blockquote>`, 'gi');
-                modifiedHtml = modifiedHtml.replace(alertRegex, (match, content) => {
-                    return `<div class="alert-block alert-${alert.type}">
-                                <div class="alert-title">${alert.icon} ${alert.keyword}</div>
-                                <div>${content.trim()}</div>
+            let contentOutput = htmlContent;
+            structures.forEach(type => {
+                const searchExpression = new RegExp(`<blockquote>\\s*<p>\\s*\\[!${type.keyword}\\]([\\s\\S]*?)</p>\\s*<\/blockquote>`, 'gi');
+                contentOutput = contentOutput.replace(searchExpression, (match, bodyText) => {
+                    return `<div class="alert-block alert-${type.cls}">
+                                <div class="alert-title">${type.icon} ${type.keyword}</div>
+                                <div>${bodyText.trim()}</div>
                             </div>`;
                 });
             });
-            return modifiedHtml;
+            return contentOutput;
         }
 
-        // Processing Pipeline Core Function
-        function processWorkspaceMatrix() {
-            const rawValue = inputArea.value;
-            
-            // Convert core markdown text symbols and HTML structures
-            let renderedHtml = marked.parse(rawValue);
-            
-            // Route through custom Jacob Corp alert banner injector
-            renderedHtml = parseCustomGitHubAlerts(renderedHtml);
-            
-            // Output directly to viewport layout frame
-            outputDiv.innerHTML = renderedHtml;
+        // Live Metric tracking calculations
+        function calculateDocumentAnalytics(text) {
+            const charCount = text.length;
+            const wordMatch = text.trim().match(/\s+/g);
+            const wordCount = text.trim() === "" ? 0 : (wordMatch ? wordMatch.length + 1 : 1);
+            const minutesToRead = Math.ceil(wordCount / 200);
 
-            // Trigger Autosave Mechanism
-            localStorage.setItem('jacobcorp_studio_autosave', rawValue);
-            saveStatus.innerText = "💾 Autosaved changes";
-            saveStatus.style.color = "var(--accent-green)";
-            
-            setTimeout(() => {
-                saveStatus.innerText = "💾 System Synced";
-                saveStatus.style.color = "#8b949e";
-            }, 1000);
+            document.getElementById('stat-words').innerText = `Words: ${wordCount}`;
+            document.getElementById('stat-chars').innerText = `Characters: ${charCount}`;
+            document.getElementById('stat-time').innerText = `Est. Reading Time: ${minutesToRead}m`;
         }
 
-        // Check local storage for existing autosaved sessions upon runtime load
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedData = localStorage.getItem('jacobcorp_studio_autosave');
-            if (savedData) {
-                inputArea.value = savedData;
-            } else {
-                // Starter template demonstrating layout rules
-                inputArea.value = `<h1>Raw HTML Title Header Layout</h1>\n\n# # Markdown Tag Header\n\nUsing regular \`code box\` definitions here.\n\n\`\`\`javascript\n// Copy and paste code box block\nconsole.log("Jacob Corp Engine Online");\n\`\`\`\n\n* List Element Item 1\n* List Element Item 2\n\n> Line Creator Tag Quote\n\n> [!WARNING]\n> High execution speeds active in base framework core rules.`;
-            }
-            processWorkspaceMatrix();
+        // Synchronized Scrolling Pipeline Feature
+        inputArea.addEventListener('scroll', () => {
+            const scrollPercentage = inputArea.scrollTop / (inputArea.scrollHeight - inputArea.clientHeight);
+            outputDiv.scrollTop = scrollPercentage * (outputDiv.scrollHeight - outputDiv.clientHeight);
         });
 
-        // Track live keystrokes to pipe updates down instantly
-        inputArea.addEventListener('input', processWorkspaceMatrix);
+        // The Core Parsing Engine Run Sequence
+        function executionPipeline() {
+            const dataString = inputArea.value;
+            
+            let htmlTree = marked.parse(dataString);
+            htmlTree = parseAllAlertBlocks(htmlTree);
+            outputDiv.innerHTML = htmlTree;
+
+            // Highlight newly added code snippets dynamically via hljs
+            outputDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
+            calculateDocumentAnalytics(dataString);
+
+            // Execute local background storage update (Autosave loop)
+            localStorage.setItem('jacobcorp_high_engine_data', dataString);
+            saveStatus.innerText = "💾 Core Sync Active...";
+            saveStatus.style.color = "var(--accent-green)";
+        }
+
+        // Export data stream function block
+        function exportMarkdownFile() {
+            const blob = new Blob([inputArea.value], { type: 'text/markdown' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'jacobcorp_doc.md';
+            link.click();
+        }
+
+        // Runtime bootstrap sequence checking local arrays
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedState = localStorage.getItem('jacobcorp_high_engine_data');
+            if (savedState) {
+                inputArea.value = savedState;
+            } else {
+                inputArea.value = `<h1>Ultimate Rendering Engine Suite</h1>\n\n# # Standard Markdown Heading\n\nLet's view a normal \`code box\` syntax highlighting array block:\n\n\`\`\`python\n# Premium Highlighting Sequence\ndef activate_meta_script():\n    print("Meta Engine Generation v3.0 Cleared.")\n\`\`\`\n\n> [!TIP]\n> Scroll inside the editor block to watch scroll-synchronization track paths automatically.\n\n> [!CAUTION]\n> Unsaved buffer clear routines are fully prevented by local tracking layers.`;
+            }
+            executionPipeline();
+        });
+
+        inputArea.addEventListener('input', executionPipeline);
     </script>
 </body>
 </html>
