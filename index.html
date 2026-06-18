@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jacob Corp. | Advanced Markdown Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --panel-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --accent-blue: #58a6ff;
+            --accent-green: #2ea44f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Navbar */
+        header {
+            background-color: #1f242c;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .brand span {
+            color: var(--accent-blue);
+        }
+
+        .status-badge {
+            background-color: #21262d;
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: #8b949e;
+        }
+
+        /* Studio Split Screen Workspace */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .pane {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-pane {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .pane-title {
+            background-color: #0f141c;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #8b949e;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Code Editor Input Textarea */
+        textarea {
+            flex: 1;
+            background-color: #090d13;
+            color: #e6edf3;
+            border: none;
+            resize: none;
+            padding: 1.5rem;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        /* Render Preview Container */
+        .preview-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background-color: var(--bg-dark);
+            line-height: 1.6;
+        }
+
+        /* Markdown Elements Custom Styling inside Preview */
+        .preview-body h1, .preview-body h2, .preview-body h3 { color: #ffffff; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; }
+        .preview-body a { color: var(--accent-blue); }
+        .preview-body code { background-color: rgba(110,118,129,0.4); padding: 0.2rem 0.4rem; border-radius: 6px; font-family: monospace; font-size: 85%; }
+        
+        /* Copy and Paste code blocks styling */
+        .preview-body pre { background-color: var(--panel-bg); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; overflow-x: auto; position: relative; }
+        .preview-body pre code { background-color: transparent; padding: 0; font-size: 0.95rem; }
+
+        .preview-body blockquote { margin: 1rem 0; padding: 0 1rem; color: #8b949e; border-left: 0.25rem solid #30363d; }
+
+        /* Custom GitHub Alert Callout Blocks */
+        .alert-block {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid;
+            border-radius: 6px;
+            background-color: rgba(110, 118, 129, 0.05);
+        }
+        .alert-title { font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 6px; }
+        
+        .alert-note { border-left-color: #1f6feb; color: #58a6ff; }
+        .alert-tip { border-left-color: #238636; color: #56d364; }
+        .alert-important { border-left-color: #8957e5; color: #d2a8ff; }
+        .alert-warning { border-left-color: #9e6a03; color: #e3b341; }
+        .alert-caution { border-left-color: #da3633; color: #ff7b72; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">JACOB<span>CORP</span> // Markdown Studio</div>
+        <div class="status-badge" id="save-status">💾 System Synced</div>
+    </header>
+
+    <div class="workspace">
+        <div class="pane editor-pane">
+            <div class="pane-title">Raw Markdown / HTML Input</div>
+            <textarea id="markdown-input" placeholder="Type # Markdown, raw HTML tags, or > [!WARNING] alerts here..."></textarea>
+        </div>
+
+        <div class="pane">
+            <div class="pane-title">Live Production Render Preview</div>
+            <div class="preview-body" id="preview-output"></div>
+        </div>
+    </div>
+
+    <script>
+        const inputArea = document.getElementById('markdown-input');
+        const outputDiv = document.getElementById('preview-output');
+        const saveStatus = document.getElementById('save-status');
+
+        // Configure Marked library to allow raw HTML header rendering tags natively
+        marked.setOptions({
+            allowRawHtml: true,
+            breaks: true,
+            gfm: true
+        });
+
+        // Regex matrix rule processor to transform GitHub style tags > [!WARNING] into actual components
+        function parseCustomGitHubAlerts(htmlContent) {
+            const alerts = [
+                { type: 'note', keyword: 'NOTE', icon: 'ℹ️' },
+                { type: 'tip', keyword: 'TIP', icon: '💡' },
+                { type: 'important', keyword: 'IMPORTANT', icon: '📢' },
+                { type: 'warning', keyword: 'WARNING', icon: '⚠️' },
+                { type: 'caution', keyword: 'CAUTION', icon: '🛑' }
+            ];
+
+            let modifiedHtml = htmlContent;
+            alerts.forEach(alert => {
+                // Matches markdown blockquotes containing the banner configuration token
+                const alertRegex = new RegExp(`<blockquote>\\s*<p>\\s*\\[!${alert.keyword}\\]([\\s\\S]*?)</p>\\s*<\/blockquote>`, 'gi');
+                modifiedHtml = modifiedHtml.replace(alertRegex, (match, content) => {
+                    return `<div class="alert-block alert-${alert.type}">
+                                <div class="alert-title">${alert.icon} ${alert.keyword}</div>
+                                <div>${content.trim()}</div>
+                            </div>`;
+                });
+            });
+            return modifiedHtml;
+        }
+
+        // Processing Pipeline Core Function
+        function processWorkspaceMatrix() {
+            const rawValue = inputArea.value;
+            
+            // Convert core markdown text symbols and HTML structures
+            let renderedHtml = marked.parse(rawValue);
+            
+            // Route through custom Jacob Corp alert banner injector
+            renderedHtml = parseCustomGitHubAlerts(renderedHtml);
+            
+            // Output directly to viewport layout frame
+            outputDiv.innerHTML = renderedHtml;
+
+            // Trigger Autosave Mechanism
+            localStorage.setItem('jacobcorp_studio_autosave', rawValue);
+            saveStatus.innerText = "💾 Autosaved changes";
+            saveStatus.style.color = "var(--accent-green)";
+            
+            setTimeout(() => {
+                saveStatus.innerText = "💾 System Synced";
+                saveStatus.style.color = "#8b949e";
+            }, 1000);
+        }
+
+        // Check local storage for existing autosaved sessions upon runtime load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem('jacobcorp_studio_autosave');
+            if (savedData) {
+                inputArea.value = savedData;
+            } else {
+                // Starter template demonstrating layout rules
+                inputArea.value = `<h1>Raw HTML Title Header Layout</h1>\n\n# # Markdown Tag Header\n\nUsing regular \`code box\` definitions here.\n\n\`\`\`javascript\n// Copy and paste code box block\nconsole.log("Jacob Corp Engine Online");\n\`\`\`\n\n* List Element Item 1\n* List Element Item 2\n\n> Line Creator Tag Quote\n\n> [!WARNING]\n> High execution speeds active in base framework core rules.`;
+            }
+            processWorkspaceMatrix();
+        });
+
+        // Track live keystrokes to pipe updates down instantly
+        inputArea.addEventListener('input', processWorkspaceMatrix);
+    </script>
+</body>
+</html>
