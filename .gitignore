@@ -1,0 +1,8 @@
+# Jacob Corp Workspace System Environment Filters
+.DS_Store
+Thumbs.db
+*.log
+.env
+.sandbox/
+dist/
+node_modules/
