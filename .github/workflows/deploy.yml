@@ -1,4 +1,33 @@
-.DS_Store
-Thumbs.db
-*.log
-.env
+name: Deploy Markdown Studio to Pages
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Tree
+        uses: actions/checkout@v4
+      - name: Setup Pages Infrastructure
+        uses: actions/configure-pages@v4
+      - name: Upload Artifact Storage
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to Live Web URL
+        id: deployment
+        uses: actions/deploy-pages@v4
